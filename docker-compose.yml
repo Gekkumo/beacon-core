@@ -1,0 +1,85 @@
+name: beacon
+
+services:
+  beacon-postgres:
+    image: postgres:18.4-alpine3.23
+    container_name: beacon-postgres
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+    volumes:
+      - ${PWD}/.docker-data/postgres:/var/lib/postgresql/data
+    restart: always
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  postgres-forwarder:
+    image: alpine/socat:1.8.0.3
+    container_name: beacon-postgres-forwarder
+    command: "TCP-LISTEN:5432,fork,reuseaddr TCP-CONNECT:beacon-postgres:5432"
+    ports:
+      - "127.0.0.1:5432:5432"
+    depends_on:
+      beacon-postgres:
+        condition: service_healthy
+
+  beacon-kafka:
+    image: apache/kafka:4.3.0
+    container_name: beacon-kafka
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: 'broker,controller'
+      KAFKA_LISTENERS: 'PLAINTEXT://:9092,CONTROLLER://:9093'
+      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://localhost:9092'
+      KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT'
+      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@beacon-kafka:9093'
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+    volumes:
+      - ${PWD}/.docker-data/kafka:/var/lib/kafka/data
+    restart: always
+    healthcheck:
+      test: [ "CMD-SHELL", "kafka-broker-api-versions.sh --bootstrap-server localhost:9092" ]
+      interval: 5s
+      timeout: 10s
+      retries: 10
+
+  kafka-forwarder:
+    image: alpine/socat:1.8.0.3
+    container_name: beacon-kafka-forwarder
+    command: "TCP-LISTEN:9092,fork,reuseaddr TCP-CONNECT:beacon-kafka:9092"
+    ports:
+      - "127.0.0.1:9092:9092"
+    depends_on:
+      beacon-kafka:
+        condition: service_healthy
+
+  beacon-valkey:
+    image: valkey/valkey:9.1.0-alpine3.23
+    container_name: beacon-valkey
+    command: valkey-server --requirepass ${VALKEY_PASSWORD} --save 60 1 --loglevel warning
+    volumes:
+      - ${PWD}/.docker-data/valkey:/data
+    restart: always
+    healthcheck:
+      test: [ "CMD", "valkey-cli", "-a", "${VALKEY_PASSWORD}", "ping" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  valkey-forwarder:
+    image: alpine/socat:1.8.0.3
+    container_name: beacon-valkey-forwarder
+    command: "TCP-LISTEN:6379,fork,reuseaddr TCP-CONNECT:beacon-valkey:6379"
+    ports:
+      - "127.0.0.1:6379:6379"
+    depends_on:
+      beacon-valkey:
+        condition: service_healthy
