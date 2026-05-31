@@ -9,7 +9,7 @@ services:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - POSTGRES_DB=${POSTGRES_DB}
     volumes:
-      - ${PWD}/.docker-data/postgres:/var/lib/postgresql/data
+      - ${PWD}/.docker-data/postgres:/var/lib/postgresql
     restart: always
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}" ]
@@ -46,9 +46,9 @@ services:
       - ${PWD}/.docker-data/kafka:/var/lib/kafka/data
     restart: always
     healthcheck:
-      test: [ "CMD-SHELL", "kafka-broker-api-versions.sh --bootstrap-server localhost:9092" ]
+      test: [ "CMD-SHELL", "nc -z 127.0.0.1 9092 || exit 1" ]
       interval: 5s
-      timeout: 10s
+      timeout: 5s
       retries: 10
 
   kafka-forwarder:
