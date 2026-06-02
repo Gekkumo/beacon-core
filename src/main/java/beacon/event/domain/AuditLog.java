@@ -3,6 +3,7 @@ package beacon.event.domain;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.Instant;
 import java.util.UUID;
 
 @Entity
@@ -53,6 +54,9 @@ public class AuditLog {
     @Column(name = "context", nullable = false, updatable = false, columnDefinition = "jsonb")
     private String context;
 
+    @Column(name = "occurred_at", nullable = false, updatable = false)
+    private Instant occurredAt;
+
     @PrePersist
     void prePersist() {
         if (status == null) {
@@ -60,6 +64,9 @@ public class AuditLog {
         }
         if (context == null) {
             context = "{}";
+        }
+        if (occurredAt == null) {
+            occurredAt = Instant.now();
         }
     }
 }
