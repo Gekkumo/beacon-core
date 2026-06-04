@@ -1,5 +1,6 @@
 package beacon.event.domain;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.JdbcTypeCode;
@@ -28,7 +29,7 @@ public class Event {
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "payload", nullable = false, updatable = false, columnDefinition = "jsonb")
-    private String payload;
+    private JsonNode payload;
 
     @Column(name = "occurred_at", nullable = false, updatable = false)
     private Instant occurredAt;

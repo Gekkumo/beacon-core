@@ -2,6 +2,8 @@ package beacon.event.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -48,9 +50,11 @@ public class AuditLog {
     @Column(name = "user_agent", updatable = false, length = 500)
     private String userAgent;
 
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "changes", updatable = false, columnDefinition = "jsonb")
     private String changes;
 
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "context", nullable = false, updatable = false, columnDefinition = "jsonb")
     private String context;
 
