@@ -23,6 +23,7 @@ services:
     command: "TCP-LISTEN:5432,fork,reuseaddr TCP-CONNECT:beacon-postgres:5432"
     ports:
       - "127.0.0.1:5432:5432"
+    restart: always
     depends_on:
       beacon-postgres:
         condition: service_healthy
@@ -57,6 +58,7 @@ services:
     command: "TCP-LISTEN:9092,fork,reuseaddr TCP-CONNECT:beacon-kafka:9092"
     ports:
       - "127.0.0.1:9092:9092"
+    restart: always
     depends_on:
       beacon-kafka:
         condition: service_healthy
@@ -69,7 +71,7 @@ services:
       - ${PWD}/.docker-data/valkey:/data
     restart: always
     healthcheck:
-      test: [ "CMD", "valkey-cli", "-a", "${VALKEY_PASSWORD}", "ping" ]
+      test: [ "CMD-SHELL", "valkey-cli" "-a" "${VALKEY_PASSWORD}" "ping" ]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -80,6 +82,7 @@ services:
     command: "TCP-LISTEN:6379,fork,reuseaddr TCP-CONNECT:beacon-valkey:6379"
     ports:
       - "127.0.0.1:6379:6379"
+    restart: always
     depends_on:
       beacon-valkey:
         condition: service_healthy
