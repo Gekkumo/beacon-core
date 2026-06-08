@@ -71,7 +71,7 @@ services:
       - ${PWD}/.docker-data/valkey:/data
     restart: always
     healthcheck:
-      test: [ "CMD-SHELL", "valkey-cli" "-a" "${VALKEY_PASSWORD}" "ping" ]
+      test: [ "CMD-SHELL", "valkey-cli -a ${VALKEY_PASSWORD} ping" ]
       interval: 5s
       timeout: 5s
       retries: 5
