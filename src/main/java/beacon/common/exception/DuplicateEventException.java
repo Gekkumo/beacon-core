@@ -1,8 +1,12 @@
 package beacon.common.exception;
 
+import lombok.Getter;
+import org.springframework.http.HttpStatus;
+
 import java.util.UUID;
 
-public class DuplicateEventException extends RuntimeException {
+@Getter
+public class DuplicateEventException extends BeaconException {
 
     private final UUID eventId;
 
@@ -11,7 +15,14 @@ public class DuplicateEventException extends RuntimeException {
         this.eventId = eventId;
     }
 
-    public UUID getEventId() {
-        return eventId;
+    @Override
+    public HttpStatus getStatus() {
+        return HttpStatus.CONFLICT;
     }
+
+    @Override
+    public String getErrorCode() {
+        return "DUPLICATE_EVENT";
+    }
+
 }
