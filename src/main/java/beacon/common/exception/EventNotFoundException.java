@@ -1,6 +1,10 @@
 package beacon.common.exception;
 
-public class EventNotFoundException extends RuntimeException {
+import lombok.Getter;
+import org.springframework.http.HttpStatus;
+
+@Getter
+public class EventNotFoundException extends BeaconException {
 
     private final String aggregateId;
 
@@ -9,7 +13,14 @@ public class EventNotFoundException extends RuntimeException {
         this.aggregateId = aggregateId;
     }
 
-    public String getAggregateId() {
-        return aggregateId;
+    @Override
+    public HttpStatus getStatus() {
+        return HttpStatus.NOT_FOUND;
     }
+
+    @Override
+    public String getErrorCode() {
+        return "EVENT_NOT_FOUND";
+    }
+
 }
