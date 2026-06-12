@@ -14,31 +14,22 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(DuplicateEventException.class)
-    public ResponseEntity<Map<String, Object>> handleDuplicate(DuplicateEventException ex) {
+    @ExceptionHandler(BeaconException.class)
+    public ResponseEntity<Map<String, Object>> handleBeacon(BeaconException ex) {
         Map<String, Object> body = Map.of(
-                "error", "Duplicate event",
-                "eventId", ex.getEventId().toString(),
+                "error", ex.getErrorCode(),
+                "message", ex.getMessage(),
                 "timestamp", Instant.now()
         );
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(body);
-    }
-
-    @ExceptionHandler(EventNotFoundException.class)
-    public ResponseEntity<Map<String, Object>> handleNotFound(EventNotFoundException ex) {
-        Map<String, Object> body = Map.of(
-                "error", "Not found",
-                "aggregateId", ex.getAggregateId(),
-                "timestamp", Instant.now()
-        );
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
+        return ResponseEntity.status(ex.getStatus()).body(body);
     }
 
     @ExceptionHandler(EventProcessingException.class)
     public ResponseEntity<Map<String, Object>> handleProcessing(EventProcessingException ex) {
         log.error("Event processing failed", ex);
         Map<String, Object> body = Map.of(
-                "error", "Processing failed",
+                "error", "PROCESSING_FAILED",
+                "message", ex.getMessage(),
                 "timestamp", Instant.now()
         );
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(body);
@@ -47,7 +38,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, Object>> handleValidation(MethodArgumentNotValidException ex) {
         Map<String, Object> body = Map.of(
-                "error", "Validation failed",
+                "error", "VALIDATION_FAILED",
                 "details", ex.getBindingResult().getFieldErrors().stream()
                         .map(fe -> fe.getField() + ": " + fe.getDefaultMessage())
                         .toList(),
@@ -60,7 +51,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, Object>> handleGeneral(Exception ex) {
         log.error("Unhandled exception", ex);
         Map<String, Object> body = Map.of(
-                "error", "Internal server error",
+                "error", "INTERNAL_ERROR",
                 "timestamp", Instant.now()
         );
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(body);
