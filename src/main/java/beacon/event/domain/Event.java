@@ -1,10 +1,10 @@
 package beacon.event.domain;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
+import tools.jackson.databind.JsonNode;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -21,14 +21,14 @@ public class Event {
     @Column(name = "event_id", nullable = false, updatable = false)
     private UUID eventId;
 
-    @Column(name = "aggregate_id", nullable = false, updatable = false, length = 255)
+    @Column(name = "aggregate_id", nullable = false, updatable = false)
     private String aggregateId;
 
-    @Column(name = "event_type", nullable = false, updatable = false, length = 255)
+    @Column(name = "event_type", nullable = false, updatable = false)
     private String eventType;
 
     @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = "payload", nullable = false, updatable = false, columnDefinition = "jsonb")
+    @Column(name = "payload", nullable = false, updatable = false)
     private JsonNode payload;
 
     @Column(name = "occurred_at", nullable = false, updatable = false)
@@ -37,7 +37,7 @@ public class Event {
     @Column(name = "received_at", nullable = false, updatable = false)
     private Instant receivedAt;
 
-    @Column(name = "source", nullable = false, updatable = false, length = 255)
+    @Column(name = "source", nullable = false, updatable = false)
     private String source;
 
     @PrePersist

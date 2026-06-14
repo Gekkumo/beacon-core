@@ -52,11 +52,11 @@ public class AuditLog {
     private String userAgent;
 
     @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = "changes", updatable = false, columnDefinition = "jsonb")
+    @Column(name = "changes", updatable = false)
     private JsonNode changes;
 
     @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = "context", nullable = false, updatable = false, columnDefinition = "jsonb")
+    @Column(name = "context", nullable = false, updatable = false)
     private JsonNode context;
 
     @Column(name = "occurred_at", nullable = false, updatable = false)
