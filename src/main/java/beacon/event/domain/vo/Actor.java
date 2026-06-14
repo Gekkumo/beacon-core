@@ -1,33 +1,10 @@
 package beacon.event.domain.vo;
 
-import lombok.*;
-
-@Getter
-@AllArgsConstructor
-@NoArgsConstructor(access = AccessLevel.PROTECTED, force = true)
-@EqualsAndHashCode
-@Builder
-public class Actor {
-
-    private final String actorId;
-    private final String actorType;
-    private final String actorName;
-    private final String ipAddress;
-    private final String userAgent;
-
-    public static Actor service(String serviceName) {
-        return Actor.builder()
-                .actorId(serviceName)
-                .actorType("SERVICE")
-                .actorName(serviceName)
-                .build();
-    }
+public record Actor(String actorId, String actorType, String actorName, String action, String resourceType,
+                    String resourceId, String ipAddress, String userAgent) {
 
     public static Actor system() {
-        return Actor.builder()
-                .actorId("SYSTEM")
-                .actorType("SYSTEM")
-                .actorName("System")
-                .build();
+        return new Actor("SYSTEM", "SYSTEM", "System", "SYSTEM_EVENT",
+                "UNKNOWN", "UNKNOWN", null, null);
     }
 }
