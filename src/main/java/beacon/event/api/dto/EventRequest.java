@@ -21,6 +21,6 @@ public record EventRequest(
         @NotBlank String source,
         @Valid Actor actor,
         List<Change> changes,
-        String context,
+        JsonNode context,
         UUID eventId
 ) {}
