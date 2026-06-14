@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
+import tools.jackson.databind.JsonNode;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -23,14 +24,14 @@ public class Outbox {
     @Column(name = "event_id", nullable = false, updatable = false)
     private UUID eventId;
 
-    @Column(name = "aggregate_id", nullable = false, updatable = false, length = 255)
+    @Column(name = "aggregate_id", nullable = false, updatable = false)
     private String aggregateId;
 
     @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = "payload", nullable = false, updatable = false, columnDefinition = "jsonb")
-    private String payload;
+    @Column(name = "payload", nullable = false, updatable = false)
+    private JsonNode payload;
 
-    @Column(name = "status", nullable = false, length = 20)
+    @Column(name = "status", nullable = false)
     @Builder.Default
     private String status = "PENDING";
 
