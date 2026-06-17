@@ -47,6 +47,7 @@ spring:
         spring.json.trusted.packages: "beacon.event,tools.jackson"
     listener:
       ack-mode: record
+      concurrency: 3
 
 logging:
   level:
