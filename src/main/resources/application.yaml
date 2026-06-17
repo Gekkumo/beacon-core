@@ -21,6 +21,8 @@ spring:
       hibernate:
         format_sql: true
         provider_disables_autocommit: true
+        type:
+          json_format_mapper: beacon.config.Jackson3JsonFormatMapper
 
   liquibase:
     change-log: classpath:db/changelog/db.changelog-master.yaml
@@ -29,17 +31,23 @@ spring:
     bootstrap-servers: localhost:9092
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JacksonJsonSerializer
       properties:
         enable.idempotence: true
         acks: all
+        spring.json.add.type.headers: false
     consumer:
       group-id: ${spring.application.name}
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JacksonJsonDeserializer
+      isolation-level: read_committed
+      max-poll-records: 50
       properties:
-        spring.json.trusted.packages: "beacon.event"
-        isolation.level: read_committed
+        spring.json.value.default.type: "tools.jackson.databind.JsonNode"
+        spring.json.trusted.packages: "beacon.event,tools.jackson"
+    listener:
+      ack-mode: record
+      concurrency: 3
 
 logging:
   level:

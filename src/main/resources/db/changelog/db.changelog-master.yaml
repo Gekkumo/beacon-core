@@ -89,6 +89,8 @@ databaseChangeLog:
               - column:
                   name: actor_name
                   type: VARCHAR(255)
+                  constraints:
+                    nullable: false
               - column:
                   name: action
                   type: VARCHAR(100)
@@ -130,6 +132,12 @@ databaseChangeLog:
                   defaultValue: '{}'
                   constraints:
                     nullable: false
+              - column:
+                  name: occurred_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  defaultValueComputed: NOW()
+                  constraints:
+                    nullable: false
 
         - createIndex:
             tableName: audit_log
@@ -160,3 +168,72 @@ databaseChangeLog:
                   name: resource_type
               - column:
                   name: resource_id
+
+        - createIndex:
+            tableName: audit_log
+            indexName: idx_audit_occurred
+            columns:
+              - column:
+                  name: occurred_at
+
+  - changeSet:
+      id: 2
+      author: Gekkumo
+      changes:
+        - createTable:
+            tableName: outbox
+            columns:
+              - column:
+                  name: id
+                  type: BIGSERIAL
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: event_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: aggregate_id
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: payload
+                  type: JSONB
+                  constraints:
+                    nullable: false
+              - column:
+                  name: status
+                  type: VARCHAR(20)
+                  defaultValue: 'PENDING'
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  defaultValueComputed: NOW()
+                  constraints:
+                    nullable: false
+              - column:
+                  name: version
+                  type: BIGINT
+                  defaultValue: '0'
+                  constraints:
+                    nullable: false
+
+        - createIndex:
+            tableName: outbox
+            indexName: idx_outbox_status_created
+            columns:
+              - column:
+                  name: status
+              - column:
+                  name: created_at
+
+        - createIndex:
+            tableName: outbox
+            indexName: idx_outbox_event
+            columns:
+              - column:
+                  name: event_id
