@@ -28,6 +28,11 @@ public class EventPersistenceConsumer {
             groupId = "beacon-core")
     public void consume(JsonNode root) {
         try {
+            if (root == null || root.isNull()) {
+                log.debug("Received tombstone event (null value), skipping processing");
+                return;
+            }
+
             String eventIdStr = extractEventId(root);
             UUID clientEventId = eventIdStr != null ? UUID.fromString(eventIdStr) : null;
 
@@ -62,16 +67,23 @@ public class EventPersistenceConsumer {
 
         } catch (DuplicateEventException e) {
             log.warn("Duplicate event from Kafka: eventId={}", e.getEventId());
+        } catch (EventProcessingException e) {
+            throw e;
         } catch (Exception e) {
             throw new EventProcessingException("Failed to process event", e);
         }
     }
 
     private String extractEventId(JsonNode root) {
+        if (root == null) {
+            return null;
+        }
+
         JsonNode eventIdNode = root.get("eventId");
         if (eventIdNode == null || eventIdNode.isNull()) {
             return null;
         }
+
         return eventIdNode.asString();
     }
 
