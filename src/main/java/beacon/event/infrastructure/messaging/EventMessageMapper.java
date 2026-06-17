@@ -29,12 +29,11 @@ public class EventMessageMapper {
     }
 
     public Actor extractActor(JsonNode root) {
-        JsonNode actorNode = getActorNode(root);
-        if (actorNode == null) {
+        if (!root.has("actor") || root.get("actor").isNull()) {
             return null;
         }
         try {
-            return jsonMapper.treeToValue(actorNode, Actor.class);
+            return jsonMapper.treeToValue(root.get("actor"), Actor.class);
         } catch (JacksonException e) {
             log.error("Failed to deserialize actor from message", e);
             return null;
@@ -79,12 +78,5 @@ public class EventMessageMapper {
             log.error("Failed to serialize changes to JSON", e);
             return jsonMapper.createObjectNode();
         }
-    }
-
-    private JsonNode getActorNode(JsonNode root) {
-        if (!root.has("actor") || root.get("actor").isNull()) {
-            return null;
-        }
-        return root.get("actor");
     }
 }
