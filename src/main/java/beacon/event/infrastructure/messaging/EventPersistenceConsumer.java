@@ -25,11 +25,10 @@ public class EventPersistenceConsumer {
 
     @KafkaListener(
             topics = KafkaTopicConfig.TOPIC_RAW_EVENTS,
-            groupId = "beacon-core",
-            concurrency = "3")
+            groupId = "beacon-core")
     public void consume(JsonNode root) {
         try {
-            String eventIdStr = root.has("eventId") ? root.get("eventId").asString() : null;
+            String eventIdStr = extractEventId(root);
             UUID clientEventId = eventIdStr != null ? UUID.fromString(eventIdStr) : null;
 
             if (clientEventId != null && eventService.existsByEventId(clientEventId)) {
@@ -37,12 +36,7 @@ public class EventPersistenceConsumer {
                 return;
             }
 
-            if (!root.has("aggregateId") || !root.has("eventType")
-                    || !root.has("source")
-                    || !root.has("occurredAt")) {
-                log.error("Missing required fields in event: {}", root);
-                throw new EventProcessingException("Missing required fields: aggregateId, eventType, source, occurredAt");
-            }
+            validateRequiredFields(root);
 
             String aggregateId = root.get("aggregateId").asString();
             String eventType = root.get("eventType").asString();
@@ -70,6 +64,22 @@ public class EventPersistenceConsumer {
             log.warn("Duplicate event from Kafka: eventId={}", e.getEventId());
         } catch (Exception e) {
             throw new EventProcessingException("Failed to process event", e);
+        }
+    }
+
+    private String extractEventId(JsonNode root) {
+        JsonNode eventIdNode = root.get("eventId");
+        if (eventIdNode == null || eventIdNode.isNull()) {
+            return null;
+        }
+        return eventIdNode.asString();
+    }
+
+    private void validateRequiredFields(JsonNode root) {
+        if (!root.has("aggregateId") || !root.has("eventType")
+                || !root.has("source") || !root.has("occurredAt")) {
+            log.error("Missing required fields in event: {}", root);
+            throw new EventProcessingException("Missing required fields: aggregateId, eventType, source, occurredAt");
         }
     }
 }
