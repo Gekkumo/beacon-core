@@ -1,8 +1,10 @@
 package beacon.event.application;
 
 import beacon.common.exception.DuplicateEventException;
-import beacon.common.exception.EventProcessingException;
-import beacon.event.domain.*;
+import beacon.event.domain.AuditLog;
+import beacon.event.domain.AuditLogRepository;
+import beacon.event.domain.Event;
+import beacon.event.domain.EventRepository;
 import beacon.event.domain.vo.Actor;
 import beacon.event.domain.vo.Change;
 import beacon.event.infrastructure.messaging.EventMessageMapper;
@@ -10,13 +12,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import tools.jackson.core.JacksonException;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.json.JsonMapper;
 
 import java.time.Instant;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 @Slf4j
@@ -27,7 +27,6 @@ public class EventService {
     private final EventRepository eventRepository;
     private final AuditLogRepository auditLogRepository;
     private final EventMessageMapper mapper;
-    private final OutboxRepository outboxRepository;
     private final JsonMapper jsonMapper;
 
     @Transactional
@@ -76,29 +75,6 @@ public class EventService {
                 .occurredAt(occurredAt)
                 .build();
         auditLogRepository.save(auditLog);
-
-        try {
-            JsonNode eventJson = jsonMapper.valueToTree(Map.of(
-                    "eventId", event.getEventId().toString(),
-                    "aggregateId", aggregateId,
-                    "eventType", eventType,
-                    "payload", payloadNode,
-                    "occurredAt", occurredAt.toString(),
-                    "source", source,
-                    "actor", finalActor,
-                    "changes", changes != null ? changes : List.of(),
-                    "context", context != null ? context : jsonMapper.createObjectNode()
-            ));
-            Outbox outbox = Outbox.builder()
-                    .eventId(event.getEventId())
-                    .aggregateId(aggregateId)
-                    .payload(eventJson)
-                    .build();
-            outboxRepository.save(outbox);
-        } catch (JacksonException e) {
-            log.error("Failed to serialize outbox payload for event {}", event.getEventId(), e);
-            throw new EventProcessingException("Failed to create outbox record", e);
-        }
 
         return event.getEventId();
     }
