@@ -64,6 +64,9 @@ public class AuditLog {
 
     @PrePersist
     void prePersist() {
+        if (status == null) {
+            status = "SUCCESS";
+        }
         if (occurredAt == null) {
             occurredAt = Instant.now();
         }

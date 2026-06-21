@@ -6,8 +6,6 @@ import beacon.event.domain.AuditLogRepository;
 import beacon.event.domain.Event;
 import beacon.event.domain.EventRepository;
 import beacon.event.domain.vo.Actor;
-import beacon.event.domain.vo.Change;
-import beacon.event.infrastructure.messaging.EventMessageMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -26,7 +24,6 @@ public class EventService {
 
     private final EventRepository eventRepository;
     private final AuditLogRepository auditLogRepository;
-    private final EventMessageMapper mapper;
     private final JsonMapper jsonMapper;
 
     @Transactional
@@ -38,7 +35,7 @@ public class EventService {
             Instant occurredAt,
             String source,
             Actor actor,
-            List<Change> changes,
+            JsonNode changes,
             JsonNode context
     ) {
         if (clientEventId != null && eventRepository.existsByEventId(clientEventId)) {
@@ -65,12 +62,13 @@ public class EventService {
                 .actorType(finalActor.actorType())
                 .actorName(finalActor.actorName())
                 .action(finalActor.action())
+                .status("SUCCESS")
                 .resourceType(finalActor.resourceType())
                 .resourceId(finalActor.resourceId())
                 .service(source)
                 .ipAddress(finalActor.ipAddress())
                 .userAgent(finalActor.userAgent())
-                .changes(mapper.serializeChanges(changes))
+                .changes(changes)
                 .context(context != null ? context : jsonMapper.createObjectNode())
                 .occurredAt(occurredAt)
                 .build();

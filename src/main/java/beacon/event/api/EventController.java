@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Collections;
 import java.util.UUID;
 
 @RestController
@@ -32,7 +31,7 @@ public class EventController {
                 request.occurredAt(),
                 request.source(),
                 request.actor(),
-                request.changes() != null ? request.changes() : Collections.emptyList(),
+                request.changes() != null ? request.changes() : null,
                 request.context()
         );
 
