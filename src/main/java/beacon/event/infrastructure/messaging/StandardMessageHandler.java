@@ -39,6 +39,8 @@ public class StandardMessageHandler {
             var actor = mapper.extractActor(root);
             JsonNode changes = mapper.extractChanges(root);
             JsonNode context = mapper.extractContext(root);
+            String ipAddress = actor != null ? actor.ipAddress() : null;
+            String userAgent = actor != null ? actor.userAgent() : null;
 
             eventService.processEvent(
                     clientEventId,
@@ -49,7 +51,10 @@ public class StandardMessageHandler {
                     source,
                     actor,
                     changes,
-                    context
+                    context,
+                    null,
+                    ipAddress,
+                    userAgent
             );
             log.debug("Consumed standard: aggregateId={}, type={}", aggregateId, eventType);
 

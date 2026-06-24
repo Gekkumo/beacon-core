@@ -25,6 +25,27 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-webmvc")
     implementation("org.springframework.boot:spring-boot-starter-validation")
 
+    // OpenTelemetry
+    implementation("io.opentelemetry:opentelemetry-api:1.48.0")
+    implementation("io.opentelemetry:opentelemetry-sdk:1.48.0")
+    implementation("io.opentelemetry:opentelemetry-exporter-otlp:1.48.0")
+    implementation("io.opentelemetry.proto:opentelemetry-proto:1.4.0-alpha")
+
+    // GeoIP
+    implementation("com.maxmind.geoip2:geoip2:4.2.0")
+
+    // User-Agent
+    implementation("nl.basjes.parse.useragent:yauaa:7.25.0")
+
+    // gRPC для OTLP
+    implementation("io.grpc:grpc-netty-shaded:1.70.0")
+    implementation("io.grpc:grpc-stub:1.70.0")
+    implementation("io.grpc:grpc-protobuf:1.70.0")
+
+    // Kafka stream
+    implementation("org.apache.kafka:kafka-streams:4.1.2")
+    implementation("org.springframework.kafka:spring-kafka:4.0.5")
+
     compileOnly("org.projectlombok:lombok")
     runtimeOnly("org.postgresql:postgresql")
     annotationProcessor("org.projectlombok:lombok")

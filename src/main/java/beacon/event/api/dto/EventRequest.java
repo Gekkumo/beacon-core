@@ -20,5 +20,8 @@ public record EventRequest(
         @Valid Actor actor,
         JsonNode changes,
         JsonNode context,
-        UUID eventId
+        UUID eventId,
+        String traceId,
+        String ipAddress,
+        String userAgent
 ) {}

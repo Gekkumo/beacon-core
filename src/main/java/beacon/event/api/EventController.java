@@ -32,7 +32,10 @@ public class EventController {
                 request.source(),
                 request.actor(),
                 request.changes() != null ? request.changes() : null,
-                request.context()
+                request.context(),
+                null,
+                request.actor() != null ? request.actor().ipAddress() : null,
+                request.actor() != null ? request.actor().userAgent() : null
         );
 
         return ResponseEntity.status(HttpStatus.CREATED).body(EventResponse.created(eventId));

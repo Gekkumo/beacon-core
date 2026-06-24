@@ -25,4 +25,12 @@ public class KafkaTopicConfig {
                 .replicas(1)
                 .build();
     }
+
+    @Bean
+    public NewTopic appTransactionContextTopic() {
+        return TopicBuilder.name("app-transaction-context")
+                .partitions(3)
+                .replicas(1)
+                .build();
+    }
 }

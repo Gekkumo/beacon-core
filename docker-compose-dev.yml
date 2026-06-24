@@ -82,44 +82,6 @@ services:
       beacon-kafka:
         condition: service_healthy
 
-  source-postgres:
-    image: postgres:18.4-alpine3.23
-    container_name: source-postgres
-    ports:
-      - "127.0.0.1:5433:5432"
-    environment:
-      POSTGRES_USER: source_user
-      POSTGRES_PASSWORD: source_password
-      POSTGRES_DB: service_a
-    volumes:
-      - ${PWD}/.docker-data/source-postgres:/var/lib/postgresql
-    restart: always
-    healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U source_user -d service_a" ]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-    command: >
-      postgres 
-      -c wal_level=logical
-      -c max_replication_slots=10 
-      -c max_wal_senders=10
-      -c max_connections=100
-
-  telemetrygen:
-    image: otel/opentelemetry-collector-contrib:0.154.0
-    container_name: beacon-telemetrygen
-    command: >
-      telemetrygen traces
-      --otlp-endpoint beacon-core:4318
-      --otlp-insecure
-      --duration 3600s
-      --rate 10
-    depends_on:
-      beacon-core:
-        condition: service_started
-    restart: no
-
 #  beacon-valkey:
 #    image: valkey/valkey:9.1.0-alpine3.23
 #    container_name: beacon-valkey

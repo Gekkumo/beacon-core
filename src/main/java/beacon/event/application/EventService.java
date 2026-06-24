@@ -1,8 +1,6 @@
 package beacon.event.application;
 
 import beacon.common.exception.DuplicateEventException;
-import beacon.event.domain.AuditLog;
-import beacon.event.domain.AuditLogRepository;
 import beacon.event.domain.Event;
 import beacon.event.domain.EventRepository;
 import beacon.event.domain.vo.Actor;
@@ -15,6 +13,7 @@ import tools.jackson.databind.json.JsonMapper;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Slf4j
@@ -23,7 +22,7 @@ import java.util.UUID;
 public class EventService {
 
     private final EventRepository eventRepository;
-    private final AuditLogRepository auditLogRepository;
+    private final EnrichmentService enrichmentService;
     private final JsonMapper jsonMapper;
 
     @Transactional
@@ -36,7 +35,10 @@ public class EventService {
             String source,
             Actor actor,
             JsonNode changes,
-            JsonNode context
+            JsonNode context,
+            String traceId,
+            String ipAddress,
+            String userAgent
     ) {
         if (clientEventId != null && eventRepository.existsByEventId(clientEventId)) {
             log.warn("Duplicate event detected: eventId={}", clientEventId);
@@ -44,6 +46,13 @@ public class EventService {
         }
 
         UUID finalEventId = clientEventId != null ? clientEventId : UUID.randomUUID();
+        Actor finalActor = actor != null ? actor : Actor.system();
+
+        String finalIp = ipAddress != null ? ipAddress : finalActor.ipAddress();
+        String finalUserAgent = userAgent != null ? userAgent : finalActor.userAgent();
+
+        Map<String, String> geo = enrichmentService.enrichGeoip(finalIp);
+        String parsedUserAgent = enrichmentService.parseUserAgent(finalUserAgent);
 
         Event event = Event.builder()
                 .eventId(finalEventId)
@@ -52,27 +61,20 @@ public class EventService {
                 .payload(payloadNode)
                 .occurredAt(occurredAt)
                 .source(source)
-                .build();
-        eventRepository.save(event);
-
-        Actor finalActor = actor != null ? actor : Actor.system();
-        AuditLog auditLog = AuditLog.builder()
-                .eventId(event.getEventId())
                 .actorId(finalActor.actorId())
                 .actorType(finalActor.actorType())
                 .actorName(finalActor.actorName())
-                .action(finalActor.action())
+                .ipAddress(finalIp)
+                .userAgent(parsedUserAgent != null ? parsedUserAgent : finalUserAgent)
                 .status("SUCCESS")
-                .resourceType(finalActor.resourceType())
-                .resourceId(finalActor.resourceId())
-                .service(source)
-                .ipAddress(finalActor.ipAddress())
-                .userAgent(finalActor.userAgent())
                 .changes(changes)
                 .context(context != null ? context : jsonMapper.createObjectNode())
-                .occurredAt(occurredAt)
+                .traceId(traceId)
+                .geoipCountry(geo.get("country"))
+                .geoipCity(geo.get("city"))
                 .build();
-        auditLogRepository.save(auditLog);
+
+        eventRepository.save(event);
 
         return event.getEventId();
     }
