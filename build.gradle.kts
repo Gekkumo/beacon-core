@@ -18,6 +18,7 @@ repositories {
 }
 
 dependencies {
+    // Spring Boot
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-kafka")
@@ -25,39 +26,43 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-webmvc")
     implementation("org.springframework.boot:spring-boot-starter-validation")
 
+    // Kafka Streams
+    implementation("org.apache.kafka:kafka-clients:4.1.2")
+    implementation("org.apache.kafka:kafka-streams:4.1.2")
+    implementation("org.springframework.kafka:spring-kafka:4.1.0")
+
+    // Jackson 3
+    // implementation("tools.jackson.core:jackson-databind:3.2.0")
+    // implementation("tools.jackson.core:jackson-core:3.2.0")
+
     // OpenTelemetry
-    implementation("io.opentelemetry:opentelemetry-api:1.48.0")
-    implementation("io.opentelemetry:opentelemetry-sdk:1.48.0")
-    implementation("io.opentelemetry:opentelemetry-exporter-otlp:1.48.0")
-    implementation("io.opentelemetry.proto:opentelemetry-proto:1.4.0-alpha")
+    implementation("io.opentelemetry:opentelemetry-api:1.63.0")
+    implementation("io.opentelemetry:opentelemetry-sdk:1.63.0")
+    implementation("io.opentelemetry:opentelemetry-exporter-otlp:1.63.0")
+    implementation("io.opentelemetry.proto:opentelemetry-proto:1.10.0-alpha")
+
+    // gRPC
+    implementation("io.grpc:grpc-netty-shaded:1.82.1")
+    implementation("io.grpc:grpc-stub:1.82.1")
+    implementation("io.grpc:grpc-protobuf:1.82.1")
 
     // GeoIP
-    implementation("com.maxmind.geoip2:geoip2:4.2.0")
+    implementation("com.maxmind.geoip2:geoip2:5.1.0")
 
     // User-Agent
-    implementation("nl.basjes.parse.useragent:yauaa:7.25.0")
+    implementation("nl.basjes.parse.useragent:yauaa:8.1.1")
 
-    // gRPC для OTLP
-    implementation("io.grpc:grpc-netty-shaded:1.70.0")
-    implementation("io.grpc:grpc-stub:1.70.0")
-    implementation("io.grpc:grpc-protobuf:1.70.0")
-
-    // Kafka stream
-    implementation("org.apache.kafka:kafka-streams:4.1.2")
-    implementation("org.springframework.kafka:spring-kafka:4.0.5")
-
-    compileOnly("org.projectlombok:lombok")
+    // Database
     runtimeOnly("org.postgresql:postgresql")
+
+    // Lombok
+    compileOnly("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok")
 
-    testImplementation("org.springframework.boot:spring-boot-starter-actuator-test")
-    testImplementation("org.springframework.boot:spring-boot-starter-data-jpa-test")
-    testImplementation("org.springframework.boot:spring-boot-starter-kafka-test")
-    testImplementation("org.springframework.boot:spring-boot-starter-liquibase-test")
-    testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
-    testCompileOnly("org.projectlombok:lombok")
+    // Testing
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.springframework.kafka:spring-kafka-test")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-    testAnnotationProcessor("org.projectlombok:lombok")
 }
 
 tasks.withType<Test> {
