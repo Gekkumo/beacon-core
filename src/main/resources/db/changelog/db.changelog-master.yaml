@@ -42,10 +42,59 @@ databaseChangeLog:
                   type: VARCHAR(255)
                   constraints:
                     nullable: false
+              - column:
+                  name: actor_id
+                  type: VARCHAR(255)
+              - column:
+                  name: actor_type
+                  type: VARCHAR(50)
+              - column:
+                  name: actor_name
+                  type: VARCHAR(255)
+              - column:
+                  name: actor_action
+                  type: VARCHAR(255)
+              - column:
+                  name: resource_type
+                  type: VARCHAR(255)
+              - column:
+                  name: resource_id
+                  type: VARCHAR(255)
+              - column:
+                  name: ip_address
+                  type: VARCHAR(45)
+              - column:
+                  name: user_agent
+                  type: VARCHAR(500)
+              - column:
+                  name: status
+                  type: VARCHAR(20)
+                  defaultValue: "SUCCESS"
+              - column:
+                  name: changes
+                  type: JSONB
+              - column:
+                  name: context
+                  type: JSONB
+              - column:
+                  name: trace_id
+                  type: VARCHAR(64)
+              - column:
+                  name: geoip_country
+                  type: VARCHAR(2)
+              - column:
+                  name: geoip_city
+                  type: VARCHAR(255)
+              - column:
+                  name: geoip_latitude
+                  type: DOUBLE PRECISION
+              - column:
+                  name: geoip_longitude
+                  type: DOUBLE PRECISION
 
         - createIndex:
             tableName: events
-            indexName: idx_events_aggregate
+            indexName: idx_events_aggregate_occurred
             columns:
               - column:
                   name: aggregate_id
@@ -61,179 +110,28 @@ databaseChangeLog:
 
         - createIndex:
             tableName: events
+            indexName: idx_events_trace
+            columns:
+              - column:
+                  name: trace_id
+
+        - createIndex:
+            tableName: events
             indexName: idx_events_occurred
             columns:
               - column:
                   name: occurred_at
 
-        - createTable:
-            tableName: audit_log
+        - createIndex:
+            tableName: events
+            indexName: idx_events_actor
             columns:
               - column:
-                  name: event_id
-                  type: UUID
-                  constraints:
-                    primaryKey: true
-                    nullable: false
-              - column:
                   name: actor_id
-                  type: VARCHAR(255)
-                  constraints:
-                    nullable: false
-              - column:
-                  name: actor_type
-                  type: VARCHAR(50)
-                  defaultValue: 'USER'
-                  constraints:
-                    nullable: false
-              - column:
-                  name: actor_name
-                  type: VARCHAR(255)
-                  constraints:
-                    nullable: false
-              - column:
-                  name: action
-                  type: VARCHAR(100)
-                  constraints:
-                    nullable: false
-              - column:
-                  name: status
-                  type: VARCHAR(20)
-                  defaultValue: 'SUCCESS'
-                  constraints:
-                    nullable: false
-              - column:
-                  name: resource_type
-                  type: VARCHAR(100)
-                  constraints:
-                    nullable: false
-              - column:
-                  name: resource_id
-                  type: VARCHAR(255)
-                  constraints:
-                    nullable: false
-              - column:
-                  name: service
-                  type: VARCHAR(100)
-                  constraints:
-                    nullable: false
+
+        - createIndex:
+            tableName: events
+            indexName: idx_events_ip
+            columns:
               - column:
                   name: ip_address
-                  type: VARCHAR(45)
-              - column:
-                  name: user_agent
-                  type: VARCHAR(500)
-              - column:
-                  name: changes
-                  type: JSONB
-              - column:
-                  name: context
-                  type: JSONB
-                  defaultValue: '{}'
-                  constraints:
-                    nullable: false
-              - column:
-                  name: occurred_at
-                  type: TIMESTAMP WITH TIME ZONE
-                  defaultValueComputed: NOW()
-                  constraints:
-                    nullable: false
-
-        - createIndex:
-            tableName: audit_log
-            indexName: idx_audit_event
-            columns:
-              - column:
-                  name: event_id
-
-        - createIndex:
-            tableName: audit_log
-            indexName: idx_audit_actor
-            columns:
-              - column:
-                  name: actor_id
-
-        - createIndex:
-            tableName: audit_log
-            indexName: idx_audit_action
-            columns:
-              - column:
-                  name: action
-
-        - createIndex:
-            tableName: audit_log
-            indexName: idx_audit_resource
-            columns:
-              - column:
-                  name: resource_type
-              - column:
-                  name: resource_id
-
-        - createIndex:
-            tableName: audit_log
-            indexName: idx_audit_occurred
-            columns:
-              - column:
-                  name: occurred_at
-
-  - changeSet:
-      id: 2
-      author: Gekkumo
-      changes:
-        - createTable:
-            tableName: outbox
-            columns:
-              - column:
-                  name: id
-                  type: BIGSERIAL
-                  constraints:
-                    primaryKey: true
-              - column:
-                  name: event_id
-                  type: UUID
-                  constraints:
-                    nullable: false
-              - column:
-                  name: aggregate_id
-                  type: VARCHAR(255)
-                  constraints:
-                    nullable: false
-              - column:
-                  name: payload
-                  type: JSONB
-                  constraints:
-                    nullable: false
-              - column:
-                  name: status
-                  type: VARCHAR(20)
-                  defaultValue: 'PENDING'
-                  constraints:
-                    nullable: false
-              - column:
-                  name: created_at
-                  type: TIMESTAMP WITH TIME ZONE
-                  defaultValueComputed: NOW()
-                  constraints:
-                    nullable: false
-              - column:
-                  name: version
-                  type: BIGINT
-                  defaultValue: '0'
-                  constraints:
-                    nullable: false
-
-        - createIndex:
-            tableName: outbox
-            indexName: idx_outbox_status_created
-            columns:
-              - column:
-                  name: status
-              - column:
-                  name: created_at
-
-        - createIndex:
-            tableName: outbox
-            indexName: idx_outbox_event
-            columns:
-              - column:
-                  name: event_id
